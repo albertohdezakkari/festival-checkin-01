@@ -1,96 +1,16 @@
-# Festival Check-in
+# Festival Check-in · Local
 
-Proyecto de aula listo para clonar. Crearás los recursos en AWS Academy, cargarás un evento y un perfil ficticio y comprobarás el pase por HTTP.
+Arranca las cinco Lambdas y las tres tablas de Festival Check-in en tu equipo. Usa Java 17 o superior, Node 22 y AWS CLI v2.
 
-**Para empezar en clase, sigue [0-conf.md](0-conf.md) de principio a fin.**
+[Guía HTML de arranque, consultas SQL e invocaciones](docs/local.html) · [Abrir el proyecto original para AWS](https://github.com/albertohdezakkari/festival-checkin-01/tree/main)
 
-## Recorrido por casos de uso
-
-Usa el mismo evento y usuario de principio a fin. En cada caso, abre primero `serverless.yml`, sigue las llamadas y ejecuta la comprobación. Usa el cuaderno web para seguir las explicaciones visuales y el Markdown del repositorio para ejecutar los comandos de tu copia de `festival-checkin-01`.
-
-| Caso de uso | Guía del repositorio | Explicación en el cuaderno web |
-| --- | --- | --- |
-| Preparar AWS y desplegar | [Configurar desde cero](0-conf.md) | [Preparar AWS Academy](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#iniciar-lab) |
-| Guardar un evento por capas con DynamoDB Toolbox | [Crear un evento](1-crear-evento.md) | [Crear con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#capas-eventos-orm) · [Infografía de Crear un evento](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/traza-evento/#infografia) |
-| Preparar el perfil que se inscribirá | [Crear un usuario](2-crear-usuario.md) | [Invocar crearUsuario](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#sembrar-usuarios) |
-| Leer el evento y observar el pase antes de inscribir | [Consultar una inscripción](3-consultar-inscripcion.md) | [Consultar inscripción con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#consultar-orm) |
-| Crear la relación, comprobar el 409 y leer la fecha | [Inscribir a un usuario](4-inscribir-usuario.md) | [Inscribir con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#inscribir-orm) |
-
-[Abre las pestañas de invocación con AWS CLI](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#invocaciones) para ejecutar cada función del clon. En [Invoke · Listar eventos](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#invoke-listar-eventos) puedes comprobar el alta y leer las páginas del listado.
-
-## 1. Clona y comprueba el proyecto
-
-Usa Git Bash en Windows o Terminal en macOS. Necesitas Git, Node.js 20 o superior y AWS CLI v2. Usa la versión compatible que ya tengas instalada. Lambda ejecuta Node 22 en AWS.
+Abre `docs/local.html` desde tu copia local para copiar los comandos. También puedes servir solo la guía desde la raíz del proyecto:
 
 ```bash
-git clone https://github.com/albertohdezakkari/festival-checkin-01.git
-cd festival-checkin-01
-node --version
-aws --version
-npm ci
-npm ls serverless --depth=0
+python3 -m http.server 43872 --bind 127.0.0.1 --directory docs
 ```
 
-`npm ci` instala las versiones fijadas en `package-lock.json`. Cuando termine la instalación, el segundo comando lista Serverless como dependencia directa y debe mostrar `serverless@4.45.0`. [Cuándo usar cada comando](0-conf.md#2-clona-e-instala-el-proyecto)
-
-## 2. Configura tu sesión
-
-En AWS Academy, inicia **Learner Lab → Start Lab → AWS Details → AWS CLI**. Guarda las tres credenciales temporales en un perfil de tu archivo personal `~/.aws/credentials`. Usa la cabecera `[academy]` en minúsculas para el perfil del aula. Sigue estos pasos del [cuaderno de preparación](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#iniciar-lab).
-
-Desde la raíz del proyecto, cambia los valores de ejemplo por los de tu laboratorio. Cada equipo que comparta cuenta y región debe usar un código diferente de hasta 20 caracteres, en minúsculas, con números o guiones y empezando por una letra.
-
-```bash
-export AWS_PROFILE=academy
-export AWS_REGION=us-east-1
-export FCI_EQUIPO=equipo01
-aws sts get-caller-identity --profile "$AWS_PROFILE" --region "$AWS_REGION"
-```
-
-Si guardaste las credenciales en `[default]`, exporta `AWS_PROFILE=default`. Si STS muestra `ExpiredToken`, renueva en AWS Details los tres valores del mismo perfil.
-
-```bash
-LAMBDA_ROLE_ARN=$(aws iam get-role --role-name LabRole \
-  --profile "$AWS_PROFILE" --region "$AWS_REGION" --query 'Role.Arn' --output text)
-printf '%s\n' "$LAMBDA_ROLE_ARN"
-```
-
-Si aparece el ARN de `LabRole`, expórtalo:
-
-```bash
-export LAMBDA_ROLE_ARN
-```
-
-Si el laboratorio deniega `iam:GetRole`, exporta `LAMBDA_ROLE_ARN` con el ARN completo de LabRole que te facilite el profesor. Si Serverless te pide iniciar sesión, ejecuta `npx serverless login` y completa el acceso en el navegador. Son dos accesos distintos. Serverless autentica su herramienta y AWS CLI utiliza la sesión de Academy.
-
-## 3. Despliega y prueba
-
-En la misma terminal, desde la raíz del repositorio. Si abriste otra, recupera las cuatro variables del [paso 4 de 0-conf.md](0-conf.md#4-configura-y-comprueba-tu-despliegue).
-
-```bash
-npm run deploy -- --aws-profile "$AWS_PROFILE"
-```
-
-Cuando Serverless confirme el despliegue, ejecuta:
-
-```bash
-npm run aula
-```
-
-Para una instalación nueva, verás **GET 200 → POST 201 → POST 409 → GET 200**. El comando carga el evento 1 y a `usuario-02` y muestra la URL de la API al final. Si repites la prueba, ya existe el mismo pase y el POST devuelve 409.
-
-Abre la [pantalla del festival](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#pantalla), elige **AWS**, pega la URL y consulta el evento **1** para **usuario-02**. El pase del usuario figura como **Inscrito**.
-
-## 4. Sigue el código desde la petición hasta DynamoDB
-
-En `src/eventos/crear-evento/` están los archivos del alta. En `src/eventos/buscar-evento/` están el service y el repository de lectura que reutilizan **Consultar inscripción** e **Inscribir usuario**. El modelo que comparten el alta y la lectura vive en `src/eventos/models/`. En `src/inscripciones/` están los casos **Consultar inscripción** e **Inscribir usuario**, que trabajan con `FCI_INSCRIPCIONES`. Sus handlers comparten `http/peticion.mjs` para preparar la llamada al service y responder a API Gateway. Su modelo de DynamoDB Toolbox está en `models/`.
-
-| Abre | Qué buscar |
-| --- | --- |
-| `serverless.yml` | Las cuatro funciones, las rutas GET y POST, las tres tablas y el índice `PorUsuario`. Los nombres de tabla llevan el código del equipo. |
-| `src/inscripciones/consultar-inscripcion/handler.mjs` | La entrada de API Gateway llama al caso de uso de consulta. |
-| `src/inscripciones/consultar-inscripcion/service.mjs` | Lee el evento y después el pase. Antes de inscribirse, `registration` vale `null`. |
-| `src/inscripciones/inscribir-usuario/service.mjs` y `repository.mjs` | Comprueban las referencias y guardan la inscripción con una condición que protege frente a duplicados. |
-| `src/eventos/models/evento.model.mjs` y `src/inscripciones/models/inscripcion.model.mjs` | DynamoDB Toolbox traduce `eventId` a `EVENT_ID` y `userId` a `USER_ID` sin cambiar las claves de las tablas. |
-| `src/datos/dynamo.mjs` | El cliente del SDK comparte la conexión y lee los nombres de tablas que inyecta Serverless. |
-
-Sigue en el cuaderno los pasos [Crear con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#capas-eventos-orm), [Consultar inscripción con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#consultar-orm) e [Inscribir con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#inscribir-orm). El alta del perfil y la lectura de usuario conservan el SDK directo, tal como se muestran en el cuaderno.
+- `serverless.local.yml` usa Serverless Offline y reutiliza las funciones de `serverless.yml`.
+- `npm run db:local` arranca DynamoDB Local.
+- `npm run datos:local` crea las tablas a partir del esquema del proyecto y carga el evento 1 y el usuario de aula.
+- `npm start` abre la API en el puerto 3004 y el endpoint de invocación en el 3005.

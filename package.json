@@ -6,8 +6,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "deploy": "serverless deploy",
-    "aula": "node scripts/aula.mjs"
+    "db:local": "node scripts/arrancar-dynamo-local.mjs",
+    "datos:local": "node scripts/preparar-local.mjs",
+    "start": "serverless offline start --config serverless.local.yml"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1169.0",
@@ -15,6 +16,8 @@
     "dynamodb-toolbox": "2.11.1"
   },
   "devDependencies": {
-    "serverless": "4.45.0"
+    "serverless": "3.40.0",
+    "serverless-offline": "13.9.0",
+    "yaml": "2.9.0"
   }
 }

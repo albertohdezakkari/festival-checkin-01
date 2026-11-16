@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Festival Check-in en local</title>
+<style>
+  :root { color-scheme: dark; font: 16px/1.55 system-ui,sans-serif; background: #141222; color: #faf6ff; }
+  * { box-sizing: border-box; }
+  main { max-width: 1120px; margin: auto; padding: clamp(1rem,4vw,3rem); }
+  h1 { font-size: clamp(2.2rem,6vw,3.8rem); line-height: 1.08; letter-spacing: -.045em; margin: 0; }
+  h1 span, a { color: #ffabd0; }
+  h2 { margin: 0 0 .5rem; }
+  nav { display:flex; flex-wrap:wrap; gap:.5rem; margin:1.4rem 0; }
+  nav a, button { color:inherit; background:#292338; border:1px solid #574969; border-radius:.6rem; padding:.45rem .75rem; }
+  nav a:focus-visible, button:focus-visible { outline:2px solid #ffabd0; }
+  section { border:1px solid #574969; background:#1e192c; border-radius:1rem; padding:clamp(1rem,3vw,1.8rem); margin: 1rem 0; }
+  pre { overflow:auto; background:#12101d; padding:.85rem; border-radius:.55rem; margin:.5rem 0 1rem; }
+  button { cursor:pointer; font: inherit; }
+  .dos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+  .dos > div { min-width:0; }
+  @media(max-width:700px) { .dos { grid-template-columns:minmax(0,1fr); } }
+  .resultado { padding-left:.75rem; border-left:3px solid #9ee7d8; }
+  #estado { min-height:1.5em; color:#9ee7d8; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Festival Check-in <span>en local</span></h1>
+  <nav aria-label="Recorrido local">
+    <a href="#arrancar">1 · Arrancar</a>
+    <a href="#compara-la-consulta-de-aws-con-sql">2 · CLI y SQL</a>
+    <a href="#probar">3 · Invoke y API</a>
+  </nav>
+  <section id="arrancar">
+    <h2>1 · Arranca el proyecto</h2>
+    <p>Usa Git Bash o Terminal con Node 22, Java 17 o superior y AWS CLI v2. Si ya tienes la carpeta, entra en ella y continúa con las dos terminales.</p>
+    <div class="comando"><button type="button">Copiar instalación</button><pre tabindex="0"><code>git clone --branch local https://github.com/albertohdezakkari/festival-checkin-01.git festival-checkin-local
+cd festival-checkin-local
+npm ci
+mkdir -p .local/dynamodb
+curl -fsSL https://d1ni2b6xgvw0s0.cloudfront.net/v2.x/dynamodb_local_latest.tar.gz | tar -xz -C .local/dynamodb</code></pre></div>
+    <div class="dos">
+      <div><h3>Terminal 1 · DynamoDB</h3>
+        <p>Desde la raíz del clon, arranca DynamoDB Local en el puerto 8000. Los datos se guardan en <code>.local/data</code>.</p>
+        <div class="comando"><button type="button">Copiar arranque de DynamoDB</button><pre tabindex="0"><code>npm run db:local</code></pre></div>
+        <p>Si Windows muestra <code>UnsupportedClassVersionError</code> con <code>61.0</code> y <code>55.0</code>, <a href="https://github.com/albertohdezakkari/festival-checkin-01/blob/local/0-conf.md#si-windows-sigue-usando-java-11">elige Java 17 para DynamoDB</a>.</p>
+        <p>En este Mac, si Java de Homebrew está instalado y el sistema te dice que no lo encuentra, usa:</p>
+        <div class="comando"><button type="button">Copiar arranque con Java de Homebrew</button><pre tabindex="0"><code>FCI_JAVA=/opt/homebrew/opt/openjdk@17/bin/java npm run db:local</code></pre></div>
+      </div>
+      <div><h3>Terminal 2 · Tablas y Lambdas</h3>
+        <p>Desde la misma carpeta, crea las tres tablas y carga el evento <code>1</code> y <code>usuario-02</code>. Luego arranca Serverless Offline.</p>
+        <div class="comando"><button type="button">Copiar preparación y arranque</button><pre tabindex="0"><code>npm run datos:local &amp;&amp; npm start</code></pre></div>
+        <p class="resultado">Busca <code>Datos disponibles</code> y <code>Server ready: http://127.0.0.1:3004</code>.</p>
+      </div>
+    </div>
+  </section>
+  <section id="compara-la-consulta-de-aws-con-sql">
+    <h2>2 · Lee el mismo evento con AWS CLI y SQL</h2>
+    <p>En otra terminal, define esta función de Bash. Usa credenciales ficticias durante el comando. <code>--endpoint-url</code> dirige la petición a tu DynamoDB local.</p>
+    <div class="comando"><button type="button">Copiar función local de AWS CLI</button><pre tabindex="0"><code>aws_local() (
+  unset AWS_PROFILE AWS_DEFAULT_PROFILE AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
+  export AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local
+  aws --region us-east-1 --no-cli-pager &quot;$@&quot;
+)</code></pre></div>
+    <h3>El SELECT que quieres expresar</h3>
+    <pre><code>SELECT *
+FROM "FCI_EVENTOS_local"
+WHERE EVENT_ID = 1</code></pre>
+    <div class="dos">
+      <div><h3>AWS CLI · GetItem</h3>
+        <p>Envía la clave como JSON. <code>N</code> indica que <code>1</code> es un número.</p>
+        <div class="comando"><button type="button">Copiar GetItem</button><pre tabindex="0"><code>aws_local dynamodb get-item \
+  --endpoint-url http://127.0.0.1:8000 \
+  --table-name FCI_EVENTOS_local \
+  --key &#x27;{&quot;EVENT_ID&quot;:{&quot;N&quot;:&quot;1&quot;}}&#x27; \
+  --query Item --output json</code></pre></div>
+      </div>
+      <div><h3>AWS CLI · PartiQL</h3>
+        <p>Envía el <code>SELECT</code> en <code>--statement</code>. <code>Items[0]</code> muestra el primer resultado.</p>
+        <div class="comando"><button type="button">Copiar SELECT</button><pre tabindex="0"><code>aws_local dynamodb execute-statement \
+  --endpoint-url http://127.0.0.1:8000 \
+  --statement &#x27;SELECT * FROM &quot;FCI_EVENTOS_local&quot; WHERE EVENT_ID = 1&#x27; \
+  --query &#x27;Items[0]&#x27; --output json</code></pre></div>
+      </div>
+    </div>
+    <p class="resultado">Los dos comandos deben mostrar <code>EVENT_ID = 1</code> y el título <strong>Festival de otoño</strong>.</p>
+    <h3>Lista todos los eventos</h3>
+    <p>Quita <code>WHERE</code> y muestra la lista <code>Items</code>.</p>
+    <div class="comando"><button type="button">Copiar listado SQL</button><pre tabindex="0"><code>aws_local dynamodb execute-statement \
+  --endpoint-url http://127.0.0.1:8000 \
+  --statement &#x27;SELECT * FROM &quot;FCI_EVENTOS_local&quot;&#x27; \
+  --query Items --output json</code></pre></div>
+    <p><a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html">Documentación de DynamoDB Local</a></p>
+  </section>
+  <section id="probar">
+    <h2>3 · Prueba Invoke y la API HTTP</h2>
+    <p>Usa la terminal donde definiste <code>aws_local</code>. El puerto <code>3005</code> ejecuta invocaciones directas de Lambda. El puerto <code>3004</code> recibe peticiones de la API.</p>
+    <div class="comando"><button type="button">Copiar Invoke · Listar eventos</button><pre tabindex="0"><code>mkdir -p .local
+aws_local lambda invoke \
+  --endpoint-url http://127.0.0.1:3005 \
+  --function-name festival-check-in-local-listarEventos \
+  --cli-binary-format raw-in-base64-out \
+  --payload &#x27;{}&#x27; .local/respuesta-listar.json
+cat .local/respuesta-listar.json</code></pre></div>
+    <div class="comando"><button type="button">Copiar GET y POST de inscripción</button><pre tabindex="0"><code>url_inscripcion=http://127.0.0.1:3004/events/1/registrations/usuario-02
+curl -i &quot;$url_inscripcion&quot;
+curl -i -X POST &quot;$url_inscripcion&quot;
+curl -i -X POST &quot;$url_inscripcion&quot;
+curl -i &quot;$url_inscripcion&quot;</code></pre></div>
+    <p class="resultado">En una base recién preparada, ves <code>200 → 201 → 409 → 200</code>. En la última respuesta aparece la inscripción. Si ya habías inscrito a ese usuario, los POST devuelven <code>409</code>.</p>
+  </section>
+  <p id="estado" role="status"></p>
+</main>
+<script>
+  document.querySelectorAll('.comando button').forEach(button => {
+    button.addEventListener('click', async () => {
+      const code = button.nextElementSibling.querySelector('code');
+      try {
+        await navigator.clipboard.writeText(code.textContent);
+        button.textContent = 'Comando copiado';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.querySelector('#estado').textContent = 'Copia el comando seleccionado con el teclado.';
+      }
+    });
+  });
+</script>
+</body>
+</html>
