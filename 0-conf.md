@@ -47,6 +47,18 @@ npm run db:local
 
 Deja abierta esta terminal. **Antes de avanzar**, busca `Port: 8000` en la salida.
 
+### Si npm dice Missing script db:local
+
+Comprueba la carpeta, la rama y el script desde la misma terminal:
+
+```bash
+pwd
+git branch --show-current
+npm pkg get scripts.db:local
+```
+
+Busca una carpeta que termine en `festival-checkin-local`, la rama `local` y el valor `"node scripts/arrancar-dynamo-local.mjs"`. Si la rama que ves es `main`, abre la copia local que preparaste en el paso 2. Git Bash muestra el nombre de la rama entre paréntesis al final del prompt. Cuando estés en la rama `local`, ejecuta de nuevo `npm run db:local`.
+
 ### Si Windows sigue usando Java 11
 
 El error de versiones `61.0` y `55.0` indica que DynamoDB necesita Java 17 y que el comando ha ejecutado Java 11. En Git Bash, ejecuta `java -version` y `where.exe java` para ver la versión activa y sus rutas.
