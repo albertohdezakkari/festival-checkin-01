@@ -84,6 +84,12 @@ WHERE EVENT_ID = 1</code></pre>
       </div>
     </div>
     <p class="resultado">Los dos comandos deben mostrar <code>EVENT_ID = 1</code> y el título <strong>Festival de otoño</strong>.</p>
+    <h3>Lista todos los eventos</h3>
+    <p>Quita <code>WHERE</code> y muestra la lista <code>Items</code>.</p>
+    <div class="comando"><button type="button">Copiar listado SQL</button><pre tabindex="0"><code>aws_local dynamodb execute-statement \
+  --endpoint-url http://127.0.0.1:8000 \
+  --statement &#x27;SELECT * FROM &quot;FCI_EVENTOS_local&quot;&#x27; \
+  --query Items --output json</code></pre></div>
     <p><a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html">Documentación de DynamoDB Local</a></p>
   </section>
   <section id="probar">
