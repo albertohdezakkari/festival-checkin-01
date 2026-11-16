@@ -1,6 +1,14 @@
-import { crearUsuarioRepository } from './repository.mjs';
+import { crearUsuarioRepository } from './repository.js';
 
-export async function crearUsuarioService({ userId, firstName, lastName, email, city }) {
+export type DatosUsuario = {
+  userId?: unknown;
+  firstName?: unknown;
+  lastName?: unknown;
+  email?: unknown;
+  city?: string;
+};
+
+export async function crearUsuarioService({ userId, firstName, lastName, email, city }: DatosUsuario) {
   if (typeof userId !== 'string' || !userId.trim()) {
     throw new Error('Indica el código de usuario');
   }

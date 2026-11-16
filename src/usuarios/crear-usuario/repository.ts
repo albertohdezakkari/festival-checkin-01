@@ -1,7 +1,15 @@
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { db, TABLA_USUARIOS_FCI } from '../../datos/dynamo.mjs';
+import { db, TABLA_USUARIOS_FCI } from '../../datos/dynamo.js';
 
-export async function crearUsuarioRepository({ userId, firstName, lastName, email, city }) {
+export async function crearUsuarioRepository(
+  { userId, firstName, lastName, email, city }: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    city?: string;
+  }
+) {
   const item = {
     USER_ID: userId,
     FIRST_NAME: firstName,

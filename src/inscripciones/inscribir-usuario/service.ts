@@ -1,8 +1,8 @@
-import { json } from '../http/peticion.mjs';
-import { buscarEventoService } from '../../eventos/buscar-evento/service.mjs';
-import { buscarUsuarioRepository, inscribirUsuarioRepository } from './repository.mjs';
+import { json, type ClaveInscripcion } from '../http/peticion.js';
+import { buscarEventoService } from '../../eventos/buscar-evento/service.js';
+import { buscarUsuarioRepository, inscribirUsuarioRepository } from './repository.js';
 
-export async function inscribirUsuarioService({ eventId, userId }) {
+export async function inscribirUsuarioService({ eventId, userId }: ClaveInscripcion) {
   const evento = await buscarEventoService(eventId);
   if (!evento) return json(404, { message: 'Evento no encontrado' });
 
