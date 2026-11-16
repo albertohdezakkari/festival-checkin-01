@@ -51,18 +51,26 @@ Deja abierta esta terminal. **Antes de avanzar**, busca `Port: 8000` en la salid
 
 El error de versiones `61.0` y `55.0` indica que DynamoDB necesita Java 17 y que el comando ha ejecutado Java 11. En Git Bash, ejecuta `java -version` y `where.exe java` para ver la versión activa y sus rutas.
 
-Si Java 17 todavía no está instalado, descarga **Temurin 17 JDK para Windows x64**. Si tienes permisos, usa el instalador MSI. También puedes extraer la distribución portátil en una carpeta donde tengas permiso de escritura y usar su `bin/java.exe`. [Descargar Temurin 17](https://adoptium.net/temurin/releases/?version=17&os=windows&arch=x64&package=jdk) · [Instalación en Windows](https://adoptium.net/es/installation/windows)
+Si Java 17 todavía no está instalado, descarga **Temurin 17 para Windows x64**. Abre el MSI, deja activada la opción de añadir Java a `PATH` y, cuando termine, vuelve a abrir Git Bash. Si el MSI te pide permisos de administrador, usa la versión portátil. [Descargar MSI](https://api.adoptium.net/v3/installer/latest/17/ga/windows/x64/jdk/hotspot/normal/eclipse) · [Descargar versión portátil](https://api.adoptium.net/v3/binary/latest/17/ga/windows/x64/jdk/hotspot/normal/eclipse) · [Instalación en Windows](https://adoptium.net/es/installation/windows)
 
-Si usaste el instalador de Temurin con la ubicación predeterminada, pega este bloque en la terminal 1, desde la raíz del proyecto:
+Con el MSI instalado, pega **cada comando por separado** en Git Bash, desde la raíz del proyecto.
 
 ```bash
-fci_java17=$(find "/c/Program Files/Eclipse Adoptium" -type f -path '*/jdk-17*/bin/java.exe' -print -quit 2>/dev/null)
-if [ -n "$fci_java17" ]; then
-  export FCI_JAVA="$(cygpath -m "$fci_java17")"
-  "$FCI_JAVA" -version && npm run db:local
-else
-  printf '%s\n' 'Temurin 17 no aparece en la ruta predeterminada.'
-fi
+fci_java17=$(find "/c/Program Files/Eclipse Adoptium" -type f -name java.exe -print 2>/dev/null | grep '/jdk-17' | head -n 1)
+```
+
+```bash
+echo "$fci_java17"
+```
+
+Si sale una ruta, selecciona ese Java y comprueba su versión:
+
+```bash
+export FCI_JAVA="$(cygpath -m "$fci_java17")"
+```
+
+```bash
+"$FCI_JAVA" -version && npm run db:local
 ```
 
 Si Java 17 está en otra carpeta, copia la ruta completa hasta `bin/java.exe`, escríbela con barras normales y úsala como valor de `FCI_JAVA`:
