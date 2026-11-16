@@ -39,7 +39,7 @@ function sembrar(stack, funcion, datos, archivo) {
 }
 
 async function ejecutarPrueba(archivo) {
-  const stack = 'festival-check-in-' + FCI_EQUIPO;
+  const stack = 'festival-check-in-ts-' + FCI_EQUIPO;
   const { Stacks: [despliegue] } = aws('cloudformation', 'describe-stacks', '--stack-name', stack);
   const url = despliegue.Outputs.find(item => item.OutputKey === 'HttpApiUrl')?.OutputValue;
   assert.ok(url, 'El stack debe tener una salida HttpApiUrl.');

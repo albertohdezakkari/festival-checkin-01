@@ -1,7 +1,7 @@
 import { PutItemCommand } from 'dynamodb-toolbox/entity/actions/put';
-import { MODELO_EVENTO } from '../models/evento.model.mjs';
+import { MODELO_EVENTO } from '../models/evento.model.js';
 
-export async function crearEventoRepository(eventId, title) {
+export async function crearEventoRepository(eventId: number, title: string) {
   const evento = {
     eventId,
     title

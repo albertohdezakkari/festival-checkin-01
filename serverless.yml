@@ -1,4 +1,4 @@
-service: festival-check-in
+service: festival-check-in-ts
 frameworkVersion: "4.45.0"
 
 provider:
@@ -31,6 +31,8 @@ build:
 
 package:
   patterns:
+    - "!src/**"
+    - "!tsconfig.json"
     - "!scripts/**"
     - "!README.md"
     - "!.env*"
@@ -38,21 +40,21 @@ package:
 functions:
   crearEvento:
     name: ${self:service}-${self:provider.stage}-crearEvento
-    handler: src/eventos/crear-evento/handler.handler
+    handler: dist/eventos/crear-evento/handler.handler
   listarEventos:
     name: ${self:service}-${self:provider.stage}-listarEventos
-    handler: src/eventos/listar-eventos/handler.listarEventosHandler
+    handler: dist/eventos/listar-eventos/handler.listarEventosHandler
   crearUsuario:
     name: ${self:service}-${self:provider.stage}-crearUsuario
-    handler: src/usuarios/crear-usuario/handler.handler
+    handler: dist/usuarios/crear-usuario/handler.handler
   consultarInscripcion:
-    handler: src/inscripciones/consultar-inscripcion/handler.handler
+    handler: dist/inscripciones/consultar-inscripcion/handler.handler
     events:
       - httpApi:
           method: GET
           path: /events/{eventId}/registrations/{userId}
   inscribirUsuario:
-    handler: src/inscripciones/inscribir-usuario/handler.handler
+    handler: dist/inscripciones/inscribir-usuario/handler.handler
     events:
       - httpApi:
           method: POST
@@ -63,7 +65,7 @@ resources:
     FestivalCheckInEventos:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: FCI_EVENTOS_${self:provider.stage}
+        TableName: FCI_TS_EVENTOS_${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: EVENT_ID
@@ -74,7 +76,7 @@ resources:
     FestivalCheckInInscripciones:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: FCI_INSCRIPCIONES_${self:provider.stage}
+        TableName: FCI_TS_INSCRIPCIONES_${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: EVENT_ID
@@ -98,7 +100,7 @@ resources:
     FestivalCheckInUsuarios:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: FCI_USUARIOS_${self:provider.stage}
+        TableName: FCI_TS_USUARIOS_${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: USER_ID

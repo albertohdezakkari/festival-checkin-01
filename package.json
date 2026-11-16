@@ -1,11 +1,13 @@
 {
-  "name": "festival-checkin-01",
+  "name": "festival-checkin-typescript",
   "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "predeploy": "npm run build",
     "deploy": "serverless deploy",
     "aula": "node scripts/aula.mjs"
   },
@@ -15,6 +17,9 @@
     "dynamodb-toolbox": "2.11.1"
   },
   "devDependencies": {
-    "serverless": "4.45.0"
-  }
+    "serverless": "4.45.0",
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3"
+  },
+  "type": "module"
 }

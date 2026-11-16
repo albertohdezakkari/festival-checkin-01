@@ -1,9 +1,9 @@
 import { ScanCommand } from 'dynamodb-toolbox/table/actions/scan';
-import { MODELO_EVENTO } from '../models/evento.model.mjs';
+import { MODELO_EVENTO } from '../models/evento.model.js';
 
 const EVENTOS_POR_PAGINA = 25;
 
-export async function listarEventosRepository(cursor) {
+export async function listarEventosRepository(cursor?: string) {
   const inicio = cursor == null ? undefined : { EVENT_ID: BigInt(cursor) };
 
   const { Items = [], LastEvaluatedKey } = await MODELO_EVENTO.table.build(ScanCommand)

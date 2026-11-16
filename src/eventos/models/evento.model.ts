@@ -3,7 +3,7 @@ import { Table } from 'dynamodb-toolbox/table';
 import { item } from 'dynamodb-toolbox/schema/item';
 import { string } from 'dynamodb-toolbox/schema/string';
 import { number } from 'dynamodb-toolbox/schema/number';
-import { db, TABLA_EVENTOS_FCI } from '../../datos/dynamo.mjs';
+import { db, TABLA_EVENTOS_FCI } from '../../datos/dynamo.js';
 
 const TABLA_MODELO_EVENTO = new Table({
   name: TABLA_EVENTOS_FCI,

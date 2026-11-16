@@ -1,6 +1,6 @@
 # 0 · Configura Festival Check-in desde cero
 
-**En el cuaderno web** · [Preparar AWS Academy](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#iniciar-lab) · [Leer el YAML](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#infraestructura) · [Entender el despliegue](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#desplegar-stack)
+**Explicación en el cuaderno JavaScript** · [Preparar AWS Academy](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#iniciar-lab) · [Leer el YAML](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#infraestructura) · [Entender el despliegue](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#desplegar-stack)
 
 Usa **Git Bash** en Windows o **Terminal** en macOS. Ejecuta los bloques en orden y conserva la misma terminal para que las variables sigan disponibles.
 
@@ -30,25 +30,25 @@ Serverless Framework se instala con las dependencias del proyecto en el paso 2. 
 Desde la carpeta donde guardas tus prácticas, ejecuta:
 
 ```bash
-git clone https://github.com/albertohdezakkari/festival-checkin-01.git
-cd festival-checkin-01
+git clone --branch typescript https://github.com/albertohdezakkari/festival-checkin-01.git festival-checkin-typescript
+cd festival-checkin-typescript
 ```
 
 Si ya lo clonaste, entra en la carpeta existente y actualízala:
 
 ```bash
-cd festival-checkin-01
+cd festival-checkin-typescript
 git pull --ff-only
 ```
 
-Si la terminal ya está en `festival-checkin-01`, ejecuta solo `git pull --ff-only`. Confirma dónde estás antes de instalar:
+Si la terminal ya está en `festival-checkin-typescript`, ejecuta solo `git pull --ff-only`. Confirma dónde estás antes de instalar:
 
 ```bash
 pwd
 npm pkg get name
 ```
 
-La ruta debe terminar en `festival-checkin-01` y el nombre del paquete debe ser `"festival-checkin-01"`. Si estás en `festival-checkin`, abre el clon correcto y repite el bloque.
+La ruta debe terminar en `festival-checkin-typescript` y el nombre del paquete debe ser `"festival-checkin-typescript"`. Si estás en `festival-checkin`, abre el clon correcto y repite el bloque.
 
 ```bash
 npm ci
@@ -138,7 +138,7 @@ Si tu cuenta deniega `iam:GetRole`, pide el ARN completo del rol al profesor y s
 export LAMBDA_ROLE_ARN="ARN_COMPLETO_DEL_ROL"
 ```
 
-En `serverless.yml`, el código de equipo se convierte en el entorno de Serverless y se añade al nombre de las tablas. Con `equipo01`, el stack será `festival-check-in-equipo01` y la tabla de eventos será `FCI_EVENTOS_equipo01`.
+En `serverless.yml`, el código de equipo se convierte en el entorno de Serverless y se añade al nombre de las tablas. Con `equipo01`, el stack será `festival-check-in-ts-equipo01` y la tabla de eventos será `FCI_TS_EVENTOS_equipo01`.
 
 ## 5. Despliega y carga los datos de ejemplo
 
@@ -162,7 +162,7 @@ Debe mostrar la versión del Framework. Si aparece un error al resolver una vari
 
 ### Despliega tu entorno y carga los datos
 
-Desde la raíz de `festival-checkin-01`, en la misma terminal del paso 4, comprueba los valores:
+Desde la raíz de `festival-checkin-typescript`, en la misma terminal del paso 4, comprueba los valores:
 
 ```bash
 printf 'Perfil: %s\nRegión: %s\nEquipo: %s\nRol: %s\n' \
@@ -190,7 +190,7 @@ Cuando aparezcan `Account` y `Arn`, despliega:
 npm run deploy -- --aws-profile "$AWS_PROFILE"
 ```
 
-Comprueba que el comando muestra `serverless deploy --aws-profile academy` o el perfil que hayas elegido. Serverless debe confirmar el despliegue del stack con tu código de equipo. Si AWS responde `ExpiredToken`, renueva las credenciales como indica el paso 4 y comprueba de nuevo la sesión.
+Comprueba que primero se ejecuta `npm run build`. Después, el comando muestra `serverless deploy --aws-profile academy` o el perfil que hayas elegido. Serverless debe confirmar el despliegue del stack con tu código de equipo. Si AWS responde `ExpiredToken`, renueva las credenciales como indica el paso 4 y comprueba de nuevo la sesión.
 
 Cuando Serverless confirme el despliegue, carga los datos de ejemplo y prueba el pase:
 
@@ -206,12 +206,12 @@ Si falla solo la carga o la prueba, corrige el error y vuelve a ejecutar este ú
 
 ### Lee el evento por su clave
 
-`npm run aula` acaba de cargar el evento **1**. Ahora compruebas qué quedó guardado. DynamoDB puede localizar un ítem cuando le das **la tabla y su clave primaria completa**. En `FCI_EVENTOS` la clave tiene un solo campo, `EVENT_ID`.
+`npm run aula` acaba de cargar el evento **1**. Ahora compruebas qué quedó guardado. DynamoDB puede localizar un ítem cuando le das **la tabla y su clave primaria completa**. En `FCI_TS_EVENTOS` la clave tiene un solo campo, `EVENT_ID`.
 
 
 ```bash
 aws dynamodb get-item \
-  --table-name "FCI_EVENTOS_${FCI_EQUIPO}" \
+  --table-name "FCI_TS_EVENTOS_${FCI_EQUIPO}" \
   --profile "$AWS_PROFILE" --region "$AWS_REGION" \
   --key '{"EVENT_ID":{"N":"1"}}' \
   --consistent-read --query 'Item' --output json
@@ -256,7 +256,7 @@ DynamoDB entrega la ficha dentro de un campo llamado `Item`. Imagina que `Item` 
 | Parte del comando | Qué le estás pidiendo | Valor de ejemplo y dónde se define |
 | --- | --- | --- |
 | `aws dynamodb get-item` | «Dame el ítem que corresponde a esta clave primaria». | `get-item` · Lo escribes directamente en el comando de AWS CLI. |
-| `--table-name "FCI_EVENTOS_${FCI_EQUIPO}"` | Abre la tabla de eventos de tu equipo. Si tu código es `equipo01`, el nombre será `FCI_EVENTOS_equipo01`. | `FCI_EVENTOS_equipo01` · Exportas `FCI_EQUIPO=equipo01` en el [paso 4](#4-configura-y-comprueba-tu-despliegue). Ese código se usa como etapa en [serverless.yml](serverless.yml), donde `TableName: FCI_EVENTOS_${self:provider.stage}` lee `provider.stage` del mismo archivo para completar el nombre de la tabla. |
+| `--table-name "FCI_TS_EVENTOS_${FCI_EQUIPO}"` | Abre la tabla de eventos de tu equipo. Si tu código es `equipo01`, el nombre será `FCI_TS_EVENTOS_equipo01`. | `FCI_TS_EVENTOS_equipo01` · Exportas `FCI_EQUIPO=equipo01` en el [paso 4](#4-configura-y-comprueba-tu-despliegue). Ese código se usa como etapa en [serverless.yml](serverless.yml), donde `TableName: FCI_TS_EVENTOS_${self:provider.stage}` lee `provider.stage` del mismo archivo para completar el nombre de la tabla. |
 | `--profile "$AWS_PROFILE" --region "$AWS_REGION"` | Usa la sesión del laboratorio y busca la tabla en la región del despliegue. | **Perfil `academy`** · Lo eliges con `AWS_PROFILE` en el [paso 4](#4-configura-y-comprueba-tu-despliegue). Sus credenciales están bajo `[academy]` en `~/.aws/credentials` ([paso 3](#3-activa-aws-academy-y-guarda-las-credenciales)).<br>**Región `us-east-1`** · La asignas a `AWS_REGION` en el paso 4. `provider.region` usa esa misma variable en [serverless.yml](serverless.yml). |
 | `--key '{"EVENT_ID":{"N":"1"}}'` | Busca la ficha del evento **1** por su clave. | `EVENT_ID = 1` · [serverless.yml](serverless.yml) define `EVENT_ID` como clave de tipo `N`. El `1` lo escribes en la consulta y coincide con `eventId: 1` de [scripts/aula.mjs](scripts/aula.mjs), que carga el evento «Festival de otoño» al ejecutar `npm run aula`. |
 | `--consistent-read` | Pide que la lectura refleje las escrituras ya confirmadas. | `ConsistentRead = true` · Se activa al escribir `--consistent-read` en el comando. |
@@ -277,7 +277,7 @@ Aquí `S` significa texto. **Antes de avanzar**, compara las dos salidas. Desde 
 
 ```bash
 aws dynamodb get-item \
-  --table-name "FCI_EVENTOS_${FCI_EQUIPO}" \
+  --table-name "FCI_TS_EVENTOS_${FCI_EQUIPO}" \
   --profile "$AWS_PROFILE" --region "$AWS_REGION" \
   --key '{"EVENT_ID":{"N":"1"}}' \
   --consistent-read --output json
@@ -291,9 +291,9 @@ La columna SQL usa el nombre de tabla del equipo de ejemplo, `equipo01`. Cada fi
 
 | Consulta en AWS CLI | SQL equivalente |
 | --- | --- |
-| **Leer el evento 1 con GetItem**<br>`aws dynamodb get-item \`<br>`--table-name "FCI_EVENTOS_${FCI_EQUIPO}" \`<br>`--profile "$AWS_PROFILE" --region "$AWS_REGION" \`<br>`--key '{"EVENT_ID":{"N":"1"}}' \`<br>`--consistent-read --output json` | `SELECT *`<br>`FROM FCI_EVENTOS_equipo01`<br>`WHERE EVENT_ID = 1` |
-| **Leer el evento 1 con PartiQL**<br>`aws dynamodb execute-statement \`<br>`--statement "SELECT * FROM \"FCI_EVENTOS_${FCI_EQUIPO}\" WHERE EVENT_ID = 1" \`<br>`--consistent-read --output json` | `SELECT *`<br>`FROM FCI_EVENTOS_equipo01`<br>`WHERE EVENT_ID = 1` |
-| **Listar todos los eventos con PartiQL**<br>`aws dynamodb execute-statement \`<br>`--statement "SELECT * FROM \"FCI_EVENTOS_${FCI_EQUIPO}\"" \`<br>`--consistent-read --output json` | `SELECT *`<br>`FROM FCI_EVENTOS_equipo01` |
+| **Leer el evento 1 con GetItem**<br>`aws dynamodb get-item \`<br>`--table-name "FCI_TS_EVENTOS_${FCI_EQUIPO}" \`<br>`--profile "$AWS_PROFILE" --region "$AWS_REGION" \`<br>`--key '{"EVENT_ID":{"N":"1"}}' \`<br>`--consistent-read --output json` | `SELECT *`<br>`FROM FCI_TS_EVENTOS_equipo01`<br>`WHERE EVENT_ID = 1` |
+| **Leer el evento 1 con PartiQL**<br>`aws dynamodb execute-statement \`<br>`--statement "SELECT * FROM \"FCI_TS_EVENTOS_${FCI_EQUIPO}\" WHERE EVENT_ID = 1" \`<br>`--consistent-read --output json` | `SELECT *`<br>`FROM FCI_TS_EVENTOS_equipo01`<br>`WHERE EVENT_ID = 1` |
+| **Listar todos los eventos con PartiQL**<br>`aws dynamodb execute-statement \`<br>`--statement "SELECT * FROM \"FCI_TS_EVENTOS_${FCI_EQUIPO}\"" \`<br>`--consistent-read --output json` | `SELECT *`<br>`FROM FCI_TS_EVENTOS_equipo01` |
 
 ### Consulta el mismo evento con PartiQL
 
@@ -305,7 +305,7 @@ Desde la raíz del proyecto, usa la misma terminal del paso 4. AWS CLI toma el p
 
 ```bash
 aws dynamodb execute-statement \
-  --statement "SELECT * FROM \"FCI_EVENTOS_${FCI_EQUIPO}\" WHERE EVENT_ID = 1" \
+  --statement "SELECT * FROM \"FCI_TS_EVENTOS_${FCI_EQUIPO}\" WHERE EVENT_ID = 1" \
   --consistent-read --output json
 ```
 
@@ -331,11 +331,11 @@ Quita la línea `WHERE` para pedir todos los eventos de la tabla. Ejecuta el com
 
 ```bash
 aws dynamodb execute-statement \
-  --statement "SELECT * FROM \"FCI_EVENTOS_${FCI_EQUIPO}\"" \
+  --statement "SELECT * FROM \"FCI_TS_EVENTOS_${FCI_EQUIPO}\"" \
   --consistent-read --output json
 ```
 
-**Antes de avanzar**, compara las dos listas `Items`. La primera contiene solo el evento **1**. La segunda incluye también cualquier otro evento que hayas creado. Si solo cargaste «Festival de otoño», ambas listas tienen un elemento. Al omitir `WHERE`, DynamoDB recorre la tabla y puede devolver varias páginas si hay muchos registros. [SELECT en PartiQL](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.select.html) · [execute-statement en AWS CLI](https://docs.aws.amazon.com/cli/latest/reference/dynamodb/execute-statement.html) · [Ejemplos en el cuaderno web](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#comprobar-datos)
+**Antes de avanzar**, compara las dos listas `Items`. La primera contiene solo el evento **1**. La segunda incluye también cualquier otro evento que hayas creado. Si solo cargaste «Festival de otoño», ambas listas tienen un elemento. Al omitir `WHERE`, DynamoDB recorre la tabla y puede devolver varias páginas si hay muchos registros. [SELECT en PartiQL](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.select.html) · [execute-statement en AWS CLI](https://docs.aws.amazon.com/cli/latest/reference/dynamodb/execute-statement.html) · [Ejemplos de sintaxis en el cuaderno JavaScript](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#comprobar-datos)
 
 ### Comprueba el mismo evento en la pantalla
 

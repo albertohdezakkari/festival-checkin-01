@@ -1,37 +1,35 @@
-# Festival Check-in
+# Festival Check-in · TypeScript
 
-Proyecto de aula listo para clonar. Crearás los recursos en AWS Academy, cargarás un evento y un perfil ficticio y comprobarás el pase por HTTP.
+Variante TypeScript del proyecto de aula. Con `equipo01`, el despliegue crea el stack `festival-check-in-ts-equipo01` y las tablas `FCI_TS_*_equipo01`. Puedes probar ambas versiones en el mismo laboratorio.
 
 **Para empezar en clase, sigue [0-conf.md](0-conf.md) de principio a fin.**
 
 ## Recorrido por casos de uso
 
-Usa el mismo evento y usuario de principio a fin. En cada caso, abre primero `serverless.yml`, sigue las llamadas y ejecuta la comprobación. Usa el cuaderno web para seguir las explicaciones visuales y el Markdown del repositorio para ejecutar los comandos de tu copia de `festival-checkin-01`.
+Usa el mismo evento y usuario de principio a fin. En cada caso, abre primero `serverless.yml`, sigue las llamadas y ejecuta la comprobación. El cuaderno web muestra las capas de la versión JavaScript. Para ejecutar esta variante, copia los comandos de esta rama, que usan los nombres de AWS con el sufijo `-ts` en el servicio.
 
 | Caso de uso | Guía del repositorio | Explicación en el cuaderno web |
 | --- | --- | --- |
 | Preparar AWS y desplegar | [Configurar desde cero](0-conf.md) | [Preparar AWS Academy](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#iniciar-lab) |
 | Guardar un evento por capas con DynamoDB Toolbox | [Crear un evento](1-crear-evento.md) | [Crear con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#capas-eventos-orm) · [Infografía de Crear un evento](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/traza-evento/#infografia) |
-| Preparar el perfil que se inscribirá | [Crear un usuario](2-crear-usuario.md) | [Invocar crearUsuario](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#sembrar-usuarios) |
+| Preparar el perfil que se inscribirá | [Crear un usuario](2-crear-usuario.md) | [Programar la Lambda de usuarios](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#archivo-lambda) |
 | Leer el evento y observar el pase antes de inscribir | [Consultar una inscripción](3-consultar-inscripcion.md) | [Consultar inscripción con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#consultar-orm) |
 | Crear la relación, comprobar el 409 y leer la fecha | [Inscribir a un usuario](4-inscribir-usuario.md) | [Inscribir con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#inscribir-orm) |
-
-[Abre las pestañas de invocación con AWS CLI](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#invocaciones) para ejecutar cada función del clon. En [Invoke · Listar eventos](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#invoke-listar-eventos) puedes comprobar el alta y leer las páginas del listado.
 
 ## 1. Clona y comprueba el proyecto
 
 Usa Git Bash en Windows o Terminal en macOS. Necesitas Git, Node.js 20 o superior y AWS CLI v2. Usa la versión compatible que ya tengas instalada. Lambda ejecuta Node 22 en AWS.
 
 ```bash
-git clone https://github.com/albertohdezakkari/festival-checkin-01.git
-cd festival-checkin-01
+git clone --branch typescript https://github.com/albertohdezakkari/festival-checkin-01.git festival-checkin-typescript
+cd festival-checkin-typescript
 node --version
 aws --version
 npm ci
-npm ls serverless --depth=0
+npm run build
 ```
 
-`npm ci` instala las versiones fijadas en `package-lock.json`. Cuando termine la instalación, el segundo comando lista Serverless como dependencia directa y debe mostrar `serverless@4.45.0`. [Cuándo usar cada comando](0-conf.md#2-clona-e-instala-el-proyecto)
+`npm ci` instala las dependencias fijadas en `package-lock.json`. `npm run build` comprueba los tipos y genera el JavaScript en `dist/`. En `src/` editas, por ejemplo, `handler.ts`. Al desplegar, Serverless ejecutará el `handler.js` compilado.
 
 ## 2. Configura tu sesión
 
@@ -70,7 +68,7 @@ En la misma terminal, desde la raíz del repositorio. Si abriste otra, recupera 
 npm run deploy -- --aws-profile "$AWS_PROFILE"
 ```
 
-Cuando Serverless confirme el despliegue, ejecuta:
+El paso `predeploy` compila los archivos antes de que Serverless lea `dist/`. Cuando Serverless confirme el despliegue, ejecuta:
 
 ```bash
 npm run aula
@@ -80,17 +78,34 @@ Para una instalación nueva, verás **GET 200 → POST 201 → POST 409 → GET 
 
 Abre la [pantalla del festival](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#pantalla), elige **AWS**, pega la URL y consulta el evento **1** para **usuario-02**. El pase del usuario figura como **Inscrito**.
 
+### Invoca el listado de eventos
+
+Desde la raíz del clon TypeScript, con las variables de AWS ya exportadas, ejecuta:
+
+```bash
+aws lambda invoke \
+  --function-name "festival-check-in-ts-${FCI_EQUIPO}-listarEventos" \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{}' \
+  respuesta-listar.json &&
+cat respuesta-listar.json
+```
+
+Después de `npm run aula`, busca «Festival de otoño» en `eventos`. Si hay más resultados, usa `siguienteCursor` como valor de `cursor` al repetir la invocación.
+
 ## 4. Sigue el código desde la petición hasta DynamoDB
 
-En `src/eventos/crear-evento/` están los archivos del alta. En `src/eventos/buscar-evento/` están el service y el repository de lectura que reutilizan **Consultar inscripción** e **Inscribir usuario**. El modelo que comparten el alta y la lectura vive en `src/eventos/models/`. En `src/inscripciones/` están los casos **Consultar inscripción** e **Inscribir usuario**, que trabajan con `FCI_INSCRIPCIONES`. Sus handlers comparten `http/peticion.mjs` para preparar la llamada al service y responder a API Gateway. Su modelo de DynamoDB Toolbox está en `models/`.
+En `src/eventos/crear-evento/` están los archivos del alta. En `src/eventos/buscar-evento/` están el service y el repository de lectura que reutilizan **Consultar inscripción** e **Inscribir usuario**. El modelo que comparten el alta y la lectura vive en `src/eventos/models/`. En `src/inscripciones/` están los casos **Consultar inscripción** e **Inscribir usuario**, que trabajan con `FCI_TS_INSCRIPCIONES`. Sus handlers comparten `http/peticion.ts` para preparar la llamada al service y responder a API Gateway. Su modelo de DynamoDB Toolbox está en `models/`.
 
 | Abre | Qué buscar |
 | --- | --- |
-| `serverless.yml` | Las cuatro funciones, las rutas GET y POST, las tres tablas y el índice `PorUsuario`. Los nombres de tabla llevan el código del equipo. |
-| `src/inscripciones/consultar-inscripcion/handler.mjs` | La entrada de API Gateway llama al caso de uso de consulta. |
-| `src/inscripciones/consultar-inscripcion/service.mjs` | Lee el evento y después el pase. Antes de inscribirse, `registration` vale `null`. |
-| `src/inscripciones/inscribir-usuario/service.mjs` y `repository.mjs` | Comprueban las referencias y guardan la inscripción con una condición que protege frente a duplicados. |
-| `src/eventos/models/evento.model.mjs` y `src/inscripciones/models/inscripcion.model.mjs` | DynamoDB Toolbox traduce `eventId` a `EVENT_ID` y `userId` a `USER_ID` sin cambiar las claves de las tablas. |
-| `src/datos/dynamo.mjs` | El cliente del SDK comparte la conexión y lee los nombres de tablas que inyecta Serverless. |
+| `serverless.yml` | Las cinco funciones, las rutas GET y POST, las tres tablas y el índice `PorUsuario`. Los nombres de tabla llevan el código del equipo. |
+| `src/inscripciones/consultar-inscripcion/handler.ts` | La entrada de API Gateway llama al caso de uso de consulta. |
+| `src/inscripciones/consultar-inscripcion/service.ts` | Lee el evento y después el pase. Antes de inscribirse, `registration` vale `null`. |
+| `src/inscripciones/inscribir-usuario/service.ts` y `repository.ts` | Comprueban las referencias y guardan la inscripción con una condición que protege frente a duplicados. |
+| `src/eventos/models/evento.model.ts` y `src/inscripciones/models/inscripcion.model.ts` | DynamoDB Toolbox traduce `eventId` a `EVENT_ID` y `userId` a `USER_ID` sin cambiar las claves de las tablas. |
+| `src/datos/dynamo.ts` | El cliente del SDK comparte la conexión y lee los nombres de tablas que inyecta Serverless. |
 
 Sigue en el cuaderno los pasos [Crear con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#capas-eventos-orm), [Consultar inscripción con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#consultar-orm) e [Inscribir con ORM](https://albertohdezakkari.github.io/04-PILARES-SERVERLESS/practica/festival-checkin/#inscribir-orm). El alta del perfil y la lectura de usuario conservan el SDK directo, tal como se muestran en el cuaderno.
+
+Con `NodeNext`, una importación como `from './service.js'` apunta al nombre que tendrá el archivo compilado. Durante la compilación, TypeScript encuentra el código fuente en `service.ts`. [Resolución de módulos en TypeScript](https://www.typescriptlang.org/docs/handbook/modules/reference.html#file-extension-substitution)
