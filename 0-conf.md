@@ -47,6 +47,33 @@ npm run db:local
 
 Deja abierta esta terminal. **Antes de avanzar**, busca `Port: 8000` en la salida.
 
+### Si Windows sigue usando Java 11
+
+El error de versiones `61.0` y `55.0` indica que DynamoDB necesita Java 17 y que el comando ha ejecutado Java 11. En Git Bash, ejecuta `java -version` y `where.exe java` para ver la versión activa y sus rutas.
+
+Si Java 17 todavía no está instalado, descarga **Temurin 17 JDK para Windows x64**. Si tienes permisos, usa el instalador MSI. También puedes extraer la distribución portátil en una carpeta donde tengas permiso de escritura y usar su `bin/java.exe`. [Descargar Temurin 17](https://adoptium.net/temurin/releases/?version=17&os=windows&arch=x64&package=jdk) · [Instalación en Windows](https://adoptium.net/es/installation/windows)
+
+Si usaste el instalador de Temurin con la ubicación predeterminada, pega este bloque en la terminal 1, desde la raíz del proyecto:
+
+```bash
+fci_java17=$(find "/c/Program Files/Eclipse Adoptium" -type f -path '*/jdk-17*/bin/java.exe' -print -quit 2>/dev/null)
+if [ -n "$fci_java17" ]; then
+  export FCI_JAVA="$(cygpath -m "$fci_java17")"
+  "$FCI_JAVA" -version && npm run db:local
+else
+  printf '%s\n' 'Temurin 17 no aparece en la ruta predeterminada.'
+fi
+```
+
+Si Java 17 está en otra carpeta, copia la ruta completa hasta `bin/java.exe`, escríbela con barras normales y úsala como valor de `FCI_JAVA`:
+
+```bash
+export FCI_JAVA="C:/ruta/a/tu/jdk-17/bin/java.exe"
+"$FCI_JAVA" -version && npm run db:local
+```
+
+`FCI_JAVA` elige el ejecutable para este proyecto. **Antes de avanzar**, comprueba que la versión indica **17 o superior** y que DynamoDB muestra `Port: 8000`.
+
 ## 4. Terminal 2 · Carga los datos y arranca la API
 
 Abre otra terminal Git Bash en la raíz de `festival-checkin-local`. Ejecuta:

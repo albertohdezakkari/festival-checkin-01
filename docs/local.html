@@ -44,6 +44,7 @@ curl -fsSL https://d1ni2b6xgvw0s0.cloudfront.net/v2.x/dynamodb_local_latest.tar.
       <div><h3>Terminal 1 · DynamoDB</h3>
         <p>Desde la raíz del clon, arranca DynamoDB Local en el puerto 8000. Los datos se guardan en <code>.local/data</code>.</p>
         <div class="comando"><button type="button">Copiar arranque de DynamoDB</button><pre tabindex="0"><code>npm run db:local</code></pre></div>
+        <p>Si Windows muestra <code>UnsupportedClassVersionError</code> con <code>61.0</code> y <code>55.0</code>, <a href="https://github.com/albertohdezakkari/festival-checkin-01/blob/local/0-conf.md#si-windows-sigue-usando-java-11">elige Java 17 para DynamoDB</a>.</p>
         <p>En este Mac, si Java de Homebrew está instalado y el sistema te dice que no lo encuentra, usa:</p>
         <div class="comando"><button type="button">Copiar arranque con Java de Homebrew</button><pre tabindex="0"><code>FCI_JAVA=/opt/homebrew/opt/openjdk@17/bin/java npm run db:local</code></pre></div>
       </div>
