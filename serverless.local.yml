@@ -1,0 +1,26 @@
+service: festival-check-in
+frameworkVersion: '3.40.0'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: local
+  region: us-east-1
+  environment:
+    FCI_DYNAMODB_LOCAL: http://127.0.0.1:8000
+    FCI_TABLA_EVENTOS: FCI_EVENTOS_local
+    FCI_TABLA_INSCRIPCIONES: FCI_INSCRIPCIONES_local
+    FCI_TABLA_USUARIOS: FCI_USUARIOS_local
+  httpApi:
+    payload: '2.0'
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    host: 127.0.0.1
+    httpPort: 3004
+    lambdaPort: 3005
+
+functions: ${file(./serverless.yml):functions}

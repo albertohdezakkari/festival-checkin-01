@@ -1,7 +1,15 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 
-export const db = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
+const endpoint = process.env.FCI_DYNAMODB_LOCAL;
+const config = endpoint ? {
+  endpoint,
+  region: 'us-east-1',
+  credentials: { accessKeyId: 'local', secretAccessKey: 'local' }
+} : {};
+
+export const clienteDynamo = new DynamoDBClient(config);
+export const db = DynamoDBDocumentClient.from(clienteDynamo, {
   marshallOptions: { removeUndefinedValues: true }
 });
 export const TABLA_EVENTOS_FCI = process.env.FCI_TABLA_EVENTOS;
