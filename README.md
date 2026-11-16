@@ -2,7 +2,7 @@
 
 Arranca las cinco Lambdas y las tres tablas de Festival Check-in en tu equipo. Usa Java 17 o superior, Node 22 y AWS CLI v2.
 
-[Guía HTML de arranque, consultas SQL e invocaciones](docs/local.html) · [Abrir el proyecto original para AWS](https://github.com/albertohdezakkari/festival-checkin-01/tree/main)
+[Empezar en GitHub Codespaces](0.md) · [Guía HTML de arranque, consultas SQL e invocaciones](docs/local.html) · [Abrir el proyecto original para AWS](https://github.com/albertohdezakkari/festival-checkin-01/tree/main)
 
 Abre `docs/local.html` desde tu copia local para copiar los comandos. También puedes servir solo la guía desde la raíz del proyecto:
 
