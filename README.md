@@ -1,5 +1,7 @@
 # Festival Check-in
 
+Para el taller individual de **Ayuntamiento → Obra**, abre la [preparación integrada del cuaderno](https://albertohdezakkari.github.io/typeorm-portal-2si-2sid/#preparar). Después de elegir tu correo, utiliza «1 · Preparar proyecto base». Las carpetas [`bases/taller-nest`](bases/taller-nest/) y [`bases/taller-serverless`](bases/taller-serverless/) contienen solo el arranque y la conexión: copia la que indique el cuaderno a `mi-practica` y construye allí las entidades y los casos. Cada copia tiene su propio `package.json`. Las instrucciones de Festival que siguen corresponden a la aplicación de ejemplo de la raíz.
+
 Proyecto de aula listo para clonar. Crearás los recursos en AWS Academy, cargarás un evento y un perfil ficticio y comprobarás el pase por HTTP.
 
 **Para empezar en clase, sigue [0-conf.md](0-conf.md) de principio a fin.** Si trabajas en el navegador, abre [0-codespaces.md](0-codespaces.md).

@@ -1,5 +1,7 @@
 # 0 · Festival Check-in en GitHub Codespaces
 
+Si estás realizando la ficha **Ayuntamiento → Obra (CH-22)**, sigue la [preparación visual dentro de tu cuaderno](https://albertohdezakkari.github.io/typeorm-portal-2si-2sid/#preparar), en «1 · Preparar proyecto base». Utiliza las bases de `bases/` y trabaja dentro de `mi-practica`. Esta guía conserva la preparación de la aplicación Festival de la raíz.
+
 Clona el proyecto del profesor, sube la copia a tu cuenta de GitHub y abre Codespaces desde tu propio repositorio. Desde allí desplegarás las seis Lambdas, la API y las tres tablas DynamoDB en **AWS Academy** con **Serverless Framework 3.40.0**. [Configuración del proyecto](0-conf.md)
 
 ## 1. Sube el proyecto a tu GitHub y abre tu Codespace
